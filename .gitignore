@@ -8,3 +8,4 @@ dist/
 *.env*.local
 .vercel
 .vscode/
+.env

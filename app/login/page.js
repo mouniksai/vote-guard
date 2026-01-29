@@ -9,11 +9,42 @@ import {
     Smartphone, Mail, Shield
 } from 'lucide-react';
 
+// Global API Configuration
+const API_BASE_URL = 'http://localhost:5001';
+
+// Cookie utilities for authentication
+const setCookie = (name, value, days = 7) => {
+    if (typeof document === 'undefined') return;
+    const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+};
+
+const getCookie = (name) => {
+    if (typeof document === 'undefined') return null;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+};
+
+const deleteCookie = (name) => {
+    if (typeof document === 'undefined') return;
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
 
 
 export default function VoteGuardAuth() {
     const [activeTab, setActiveTab] = useState('signin');
     const router = useRouter();
+
+    // Check if user is already authenticated
+    useEffect(() => {
+        const token = getCookie('voteGuardToken');
+        if (token) {
+            router.push('/dashboard');
+        }
+    }, [router]);
 
     return (
         <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-sans">
@@ -146,14 +177,15 @@ const SignInFlow = ({ router }) => {
         setLoading(true); setError('');
 
         try {
-            const res = await fetch('http://localhost:5001/api/auth/login', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ username, password })
             });
             // console.log('Login response status:', res);
             const data = await res.json();
-            
+
 
             // Inside handleCredentialsSubmit in SignInFlow.jsx
             if (res.ok) {
@@ -167,7 +199,10 @@ const SignInFlow = ({ router }) => {
                     // console.log('Transitioning to 2FA step');
                 } else {
                     // Fallback (if you ever disable 2FA)
-                    localStorage.setItem('voteGuardToken', data.token);
+                    setCookie('voteGuardToken', data.token);
+                    if (data.user) {
+                        setCookie('voteGuardUser', JSON.stringify(data.user));
+                    }
                     router.push('/dashboard');
                 }
             } else {
@@ -189,31 +224,31 @@ const SignInFlow = ({ router }) => {
                 exit={{ opacity: 0, x: -20 }}
                 className="space-y-8"
             >
-                 <div>
+                <div>
                     <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h2>
                     <p className="text-slate-500">Sign in to access your secure voting portal</p>
                 </div>
 
                 <form onSubmit={handleCredentialsSubmit} className="space-y-5">
-                    
 
-                    
-                    <InputField 
-                        label="Username" 
-                        icon={User} 
-                        placeholder="Enter your username" 
+
+
+                    <InputField
+                        label="Username"
+                        icon={User}
+                        placeholder="Enter your username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                     />
-                    <InputField 
-                        label="Password" 
-                        icon={Lock} 
-                        type="password" 
-                        placeholder="Enter your password" 
+                    <InputField
+                        label="Password"
+                        icon={Lock}
+                        type="password"
+                        placeholder="Enter your password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
-                    
+
                     {error && <p className="text-red-500 text-sm">{error}</p>}
 
                     <div className="flex items-center justify-between">
@@ -255,7 +290,7 @@ const RegisterWizard = () => {
         setLoading(true); setError('');
 
         try {
-            const res = await fetch('http://localhost:5001/api/auth/verify-citizen', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/verify-citizen`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ citizenId })
@@ -278,17 +313,18 @@ const RegisterWizard = () => {
 
     // --- STEP 2: CREATE ACCOUNT ---
     const handleRegister = async () => {
-        if(!username || !password) { alert("Please fill all fields"); return; }
+        if (!username || !password) { alert("Please fill all fields"); return; }
         setLoading(true);
 
         try {
-            const res = await fetch('http://localhost:5001/api/auth/register', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    citizenId, 
-                    username, 
-                    password 
+                credentials: 'include',
+                body: JSON.stringify({
+                    citizenId,
+                    username,
+                    password
                 })
             });
 
@@ -296,8 +332,10 @@ const RegisterWizard = () => {
 
             if (res.ok) {
                 // Success! Save token and redirect
-                localStorage.setItem('voteGuardToken', data.token);
-                localStorage.setItem('voteGuardUser', JSON.stringify(data.user));
+                setCookie('voteGuardToken', data.token);
+                if (data.user) {
+                    setCookie('voteGuardUser', JSON.stringify(data.user));
+                }
                 alert("Registration Successful! Please Sign In.");
                 window.location.reload(); // Or switch tab to 'signin'
             } else {
@@ -335,7 +373,7 @@ const RegisterWizard = () => {
                             We will fetch your details from the secure Government Node. This action is logged for security.
                         </p>
                     </div>
-                    
+
                     <InputField
                         label="Citizen ID"
                         icon={Fingerprint}
@@ -358,24 +396,24 @@ const RegisterWizard = () => {
                     {/* ... (Keep Verified Data Card UI same as before) ... */}
 
                     <div className="space-y-4">
-                        <InputField 
-                            label="Choose Username" 
-                            icon={User} 
-                            placeholder="e.g. voterguy123" 
+                        <InputField
+                            label="Choose Username"
+                            icon={User}
+                            placeholder="e.g. voterguy123"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                         />
-                        <InputField 
-                            label="Set Password" 
-                            icon={Lock} 
-                            type="password" 
-                            placeholder="Min. 8 characters" 
+                        <InputField
+                            label="Set Password"
+                            icon={Lock}
+                            type="password"
+                            placeholder="Min. 8 characters"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
 
-                    <button 
+                    <button
                         onClick={handleRegister}
                         disabled={loading}
                         className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2"
@@ -440,7 +478,7 @@ const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
 
     const handleVerify = async () => {
         setLoading(true);
-        
+
         // NOTE: For now, we skip mobile step logic and assume we are on email step
         // Or you can use the same OTP logic for both steps if simulating
         if (step === "mobile") {
@@ -455,12 +493,13 @@ const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
 
         try {
             // console.log('Verifying OTP for user ID:', userDetails);
-            const res = await fetch('http://localhost:5001/api/auth/verify-otp', {
+            const res = await fetch(`${API_BASE_URL}/api/auth/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                credentials: 'include',
+                body: JSON.stringify({
                     userId: userId,
-                    otp: otp 
+                    otp: otp
                 })
             });
 
@@ -468,13 +507,18 @@ const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
             const data = await res.json();
 
             if (res.ok) {
-                // FINAL SUCCESS
-                localStorage.setItem('voteGuardToken', data.token);
+                // FINAL SUCCESS - Use cookies instead of localStorage
+                setCookie('voteGuardToken', data.token);
+                if (data.user) {
+                    setCookie('voteGuardUser', JSON.stringify(data.user));
+                }
+                console.log('Authentication successful, redirecting to dashboard...');
                 router.push('/dashboard');
             } else {
                 alert(data.message); // Invalid OTP
             }
         } catch (err) {
+            console.error('OTP verification error:', err);
             alert("Verification failed");
         } finally {
             setLoading(false);
@@ -515,14 +559,14 @@ const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
                 {/* Mobile */}
                 <div
                     className={`p-4 rounded-xl border-2 flex items-center gap-4 ${step === "mobile"
-                            ? "border-blue-600 bg-blue-50/50"
-                            : "border-green-600 bg-green-50/50"
+                        ? "border-blue-600 bg-blue-50/50"
+                        : "border-green-600 bg-green-50/50"
                         }`}
                 >
                     <div
                         className={`p-3 rounded-full ${step === "mobile"
-                                ? "bg-blue-600 text-white"
-                                : "bg-green-600 text-white"
+                            ? "bg-blue-600 text-white"
+                            : "bg-green-600 text-white"
                             }`}
                     >
                         <Smartphone size={20} />
@@ -541,14 +585,14 @@ const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
                 {/* Email */}
                 <div
                     className={`p-4 rounded-xl border-2 flex items-center gap-4 ${step === "email"
-                            ? "border-blue-600 bg-blue-50/50"
-                            : "border-slate-200 bg-slate-50"
+                        ? "border-blue-600 bg-blue-50/50"
+                        : "border-slate-200 bg-slate-50"
                         }`}
                 >
                     <div
                         className={`p-3 rounded-full ${step === "email"
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-300 text-white"
+                            ? "bg-blue-600 text-white"
+                            : "bg-slate-300 text-white"
                             }`}
                     >
                         <Mail size={20} />
@@ -599,8 +643,8 @@ const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
                             <span
                                 onClick={handleResendOtp}
                                 className={`font-semibold cursor-pointer ${resendTimer > 0
-                                        ? "text-slate-400 cursor-not-allowed"
-                                        : "text-blue-600"
+                                    ? "text-slate-400 cursor-not-allowed"
+                                    : "text-blue-600"
                                     }`}
                             >
                                 {resendTimer > 0

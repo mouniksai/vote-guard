@@ -115,6 +115,8 @@ export default function VoteGuardBallot() {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [expandedCandidate, setExpandedCandidate] = useState(null);
     const [receiptHash, setReceiptHash] = useState('');
+    const [encodedFormats, setEncodedFormats] = useState(null); // Store encoded receipt formats
+    const [voteTimestamp, setVoteTimestamp] = useState(null); // Store actual vote timestamp
     const [timeLeft, setTimeLeft] = useState(5 * 60); // 5 minutes in seconds
 
     // Backend integration state
@@ -215,6 +217,14 @@ export default function VoteGuardBallot() {
 
                 if (response.ok) {
                     setReceiptHash(result.receiptHash);
+                    // Store encoded formats if available
+                    if (result.encodedFormats) {
+                        setEncodedFormats(result.encodedFormats);
+                    }
+                    // Store the actual timestamp from backend
+                    if (result.timestamp) {
+                        setVoteTimestamp(result.timestamp);
+                    }
                     setCurrentStep('confirmed');
                     return;
                 } else {
@@ -263,8 +273,8 @@ export default function VoteGuardBallot() {
                     <div className="flex items-center gap-3">
                         {/* Timer */}
                         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${timeLeft < 60
-                                ? 'bg-red-900/20 border-red-700/40 text-red-400'
-                                : 'bg-slate-800/60 border-slate-700/60 text-slate-300'
+                            ? 'bg-red-900/20 border-red-700/40 text-red-400'
+                            : 'bg-slate-800/60 border-slate-700/60 text-slate-300'
                             }`}>
                             <Clock size={14} />
                             <span className="text-sm font-mono font-bold">{formatTime(timeLeft)}</span>
@@ -324,6 +334,8 @@ export default function VoteGuardBallot() {
                 {currentStep === 'confirmed' && (
                     <ConfirmationPage
                         receiptHash={receiptHash}
+                        encodedFormats={encodedFormats}
+                        voteTimestamp={voteTimestamp}
                         election={currentData.election}
                         candidate={currentData.candidates.find(c => c.id === selectedCandidate)}
                     />
@@ -438,8 +450,8 @@ const CandidateCard = ({ candidate, isSelected, isExpanded, onSelect, onToggleEx
     <motion.div
         layout
         className={`bg-slate-800/40 backdrop-blur-md border rounded-xl overflow-hidden transition-all ${isSelected
-                ? 'border-blue-500 shadow-lg shadow-blue-900/20'
-                : 'border-slate-700/60 hover:border-slate-600'
+            ? 'border-blue-500 shadow-lg shadow-blue-900/20'
+            : 'border-slate-700/60 hover:border-slate-600'
             }`}
     >
         <div
@@ -467,12 +479,16 @@ const CandidateCard = ({ candidate, isSelected, isExpanded, onSelect, onToggleEx
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-2">
-                        <span className="text-xs px-2 py-1 bg-slate-900/60 rounded border border-slate-700/50 text-slate-300">
-                            {candidate.age} years
-                        </span>
-                        <span className="text-xs px-2 py-1 bg-slate-900/60 rounded border border-slate-700/50 text-slate-300 truncate">
-                            {candidate.experience}
-                        </span>
+                        {candidate.age && (
+                            <span className="text-xs px-2 py-1 bg-slate-900/60 rounded border border-slate-700/50 text-slate-300">
+                                {candidate.age} years
+                            </span>
+                        )}
+                        {candidate.experience && (
+                            <span className="text-xs px-2 py-1 bg-slate-900/60 rounded border border-slate-700/50 text-slate-300 truncate">
+                                {candidate.experience}
+                            </span>
+                        )}
                     </div>
 
                     <button
@@ -622,68 +638,154 @@ const CastingPage = () => (
     </motion.main>
 );
 
-// Confirmation Page - Compact
-const ConfirmationPage = ({ receiptHash, election, candidate }) => (
-    <motion.main
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative z-10 max-w-3xl mx-auto px-4 py-8 text-center"
-    >
-        <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.6 }}
-            className="w-24 h-24 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-4 border-green-500"
+// Confirmation Page - Enhanced with Encoded Receipts
+const ConfirmationPage = ({ receiptHash, encodedFormats, voteTimestamp, election, candidate }) => {
+    const [copySuccess, setCopySuccess] = useState(false);
+
+    const handleCopyReceipt = () => {
+        if (encodedFormats?.base64) {
+            navigator.clipboard.writeText(encodedFormats.base64);
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        }
+    };
+
+    const handleDownloadQR = () => {
+        if (encodedFormats?.qrCode) {
+            const link = document.createElement('a');
+            link.href = encodedFormats.qrCode;
+            link.download = `vote-receipt-${receiptHash.substring(0, 8)}.png`;
+            link.click();
+        }
+    };
+
+    return (
+        <motion.main
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative z-10 max-w-3xl mx-auto px-4 py-8 text-center"
         >
-            <CheckCircle2 size={48} className="text-green-400" />
-        </motion.div>
-
-        <h1 className="text-4xl font-bold text-white mb-3">Vote Cast Successfully!</h1>
-        <p className="text-slate-400 mb-8">Your vote has been securely recorded with cryptographic proof</p>
-
-        {/* Transaction Receipt - Compact */}
-        <div className="bg-slate-800/40 backdrop-blur-md border border-slate-700/60 rounded-2xl p-6 mb-6 text-left">
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700/50">
-                <h3 className="text-lg font-bold text-white">Vote Receipt</h3>
-                <span className="text-xs px-3 py-1 bg-green-500/10 rounded-lg border border-green-500/20 text-green-400 font-bold">CONFIRMED</span>
-            </div>
-
-            <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                    <span className="text-slate-400">Receipt Hash</span>
-                    <span className="font-mono text-white break-all">{receiptHash}</span>
-                </div>
-                <div className="flex justify-between">
-                    <span className="text-slate-400">Candidate</span>
-                    <span className="text-white">{candidate?.name}</span>
-                </div>
-                <div className="flex justify-between">
-                    <span className="text-slate-400">Election</span>
-                    <span className="text-white">{election?.title}</span>
-                </div>
-                <div className="flex justify-between">
-                    <span className="text-slate-400">Timestamp</span>
-                    <span className="text-white">{new Date().toLocaleString()}</span>
-                </div>
-            </div>
-        </div>
-
-        {/* Action Buttons - Compact */}
-        <div className="flex flex-col sm:flex-row gap-3">
-            <button className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2">
-                <Download size={18} />
-                Download Receipt
-            </button>
-            <button
-                onClick={() => window.location.href = '/dashboard'}
-                className="flex-1 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-700"
+            <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", duration: 0.6 }}
+                className="w-24 h-24 mx-auto mb-6 bg-green-500/20 rounded-full flex items-center justify-center border-4 border-green-500"
             >
-                <ExternalLink size={18} />
-                Go to Dashboard
-            </button>
-        </div>
-    </motion.main>
-);
+                <CheckCircle2 size={48} className="text-green-400" />
+            </motion.div>
+
+            <h1 className="text-4xl font-bold text-white mb-3">Vote Cast Successfully!</h1>
+            <p className="text-slate-400 mb-8">Your vote has been securely recorded with cryptographic proof</p>
+
+            {/* Transaction Receipt - Compact */}
+            <div className="bg-slate-800/40 backdrop-blur-md border border-slate-700/60 rounded-2xl p-6 mb-6 text-left">
+                <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700/50">
+                    <h3 className="text-lg font-bold text-white">Vote Receipt</h3>
+                    <span className="text-xs px-3 py-1 bg-green-500/10 rounded-lg border border-green-500/20 text-green-400 font-bold">CONFIRMED</span>
+                </div>
+
+                <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                        <span className="text-slate-400">Receipt Hash</span>
+                        <span className="font-mono text-white break-all">{receiptHash}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-slate-400">Candidate</span>
+                        <span className="text-white">{candidate?.name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-slate-400">Election</span>
+                        <span className="text-white">{election?.title}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-slate-400">Timestamp</span>
+                        <span className="text-white">{voteTimestamp ? new Date(voteTimestamp).toLocaleString() : new Date().toLocaleString()}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Encoded Receipt Section - NEW */}
+            {encodedFormats && (
+                <div className="bg-slate-800/40 backdrop-blur-md border border-blue-700/60 rounded-2xl p-6 mb-6">
+                    <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <Hash size={20} className="text-blue-400" />
+                        Encoded Receipt
+                    </h3>
+
+                    {/* QR Code Display */}
+                    {encodedFormats.qrCode && (
+                        <div className="mb-6">
+                            <p className="text-sm text-slate-400 mb-3">Scan this QR code to verify your vote:</p>
+                            <div className="bg-white p-4 rounded-xl inline-block">
+                                <img
+                                    src={encodedFormats.qrCode}
+                                    alt="Vote Receipt QR Code"
+                                    className="w-48 h-48 mx-auto"
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Barcode Number */}
+                    {encodedFormats.barcode && (
+                        <div className="mb-4 p-4 bg-slate-900/60 rounded-xl border border-slate-700/50">
+                            <p className="text-xs text-slate-500 mb-2">Barcode Number:</p>
+                            <p className="font-mono text-xl text-blue-400 font-bold tracking-wider">
+                                {encodedFormats.barcode}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Base64 Receipt Code */}
+                    {encodedFormats.base64 && (
+                        <div className="p-4 bg-slate-900/60 rounded-xl border border-slate-700/50">
+                            <p className="text-xs text-slate-500 mb-2">Encoded Receipt (Base64):</p>
+                            <p className="font-mono text-xs text-slate-300 break-all">
+                                {encodedFormats.base64.substring(0, 60)}...
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Action Buttons - Enhanced */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {encodedFormats?.qrCode && (
+                    <button
+                        onClick={handleDownloadQR}
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                    >
+                        <Download size={18} />
+                        Download QR Code
+                    </button>
+                )}
+                {encodedFormats?.base64 && (
+                    <button
+                        onClick={handleCopyReceipt}
+                        className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                    >
+                        <FileCheck size={18} />
+                        {copySuccess ? 'Copied!' : 'Copy Receipt Code'}
+                    </button>
+                )}
+                <button
+                    onClick={() => window.location.href = '/dashboard'}
+                    className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-700"
+                >
+                    <ExternalLink size={18} />
+                    Go to Dashboard
+                </button>
+                <button
+                    onClick={() => window.location.href = '/verify-receipt'}
+                    className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2"
+                >
+                    <ShieldCheck size={18} />
+                    Verify Receipt
+                </button>
+            </div>
+        </motion.main>
+    );
+};
 
 // Already Voted Page
 const AlreadyVotedPage = ({ receiptHash, election, user }) => (
@@ -756,8 +858,8 @@ const StatBadge = ({ label, value }) => (
 const ProcessStep = ({ status, text }) => (
     <div className="flex items-center gap-2">
         <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${status === 'complete' ? 'bg-green-500' :
-                status === 'active' ? 'bg-blue-500 animate-pulse' :
-                    'bg-slate-700'
+            status === 'active' ? 'bg-blue-500 animate-pulse' :
+                'bg-slate-700'
             }`}>
             {status === 'complete' && <CheckCircle2 size={12} className="text-white" />}
         </div>

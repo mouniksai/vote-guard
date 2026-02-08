@@ -18,7 +18,8 @@ import {
     AlertCircle,
     CheckCircle2,
     Loader2,
-    BarChart3
+    BarChart3,
+    Scan
 } from 'lucide-react';
 
 // Global API Configuration - Change this URL to update backend endpoint everywhere
@@ -361,6 +362,27 @@ export default function VoteGuardDashboard() {
                         </div>
                     </div>
 
+                    {/* 3.5 VERIFY RECEIPT CARD (1x1) - NEW */}
+                    <div className="bg-gradient-to-br from-purple-900/20 to-blue-900/20 backdrop-blur-md border border-purple-700/40 rounded-[2rem] p-6 flex flex-col justify-between hover:border-purple-600/60 transition-all group cursor-pointer"
+                        onClick={() => router.push('/verify-receipt')}>
+                        <div>
+                            <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-4 border border-purple-500/30 group-hover:bg-purple-500/30 transition-all">
+                                <Scan className="text-purple-400" size={24} />
+                            </div>
+                            <h3 className="text-lg font-bold text-white mb-1">Verify Receipt</h3>
+                            <p className="text-xs text-slate-400">Check vote confirmation</p>
+                        </div>
+                        <div className="mt-4">
+                            <p className="text-sm text-slate-300 mb-4 leading-relaxed">
+                                Verify your encoded receipt against blockchain records
+                            </p>
+                            <button className="w-full bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 px-4 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-2 border border-purple-500/30 group-hover:border-purple-500/50">
+                                Verify Now
+                                <ChevronRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+
                     {/* 4. IMMUTABLE HISTORY (Wide Bar) */}
                     <div className="md:col-span-3 lg:col-span-2 bg-slate-800/40 backdrop-blur-md border border-slate-700/60 rounded-[2rem] p-6">
                         <div className="flex items-center justify-between mb-6">
@@ -373,7 +395,10 @@ export default function VoteGuardDashboard() {
                                     <p className="text-xs text-slate-400">Stored on Ethereum Ledger</p>
                                 </div>
                             </div>
-                            <button className="text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors">
+                            <button
+                                onClick={() => router.push('/vote-history')}
+                                className="text-xs font-medium text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
+                            >
                                 Explorer <ExternalLink size={12} />
                             </button>
                         </div>

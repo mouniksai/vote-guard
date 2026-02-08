@@ -1,87 +1,146 @@
 # Vote Guard
 
-Vote Guard is a secure electronic voting system prototype designed to ensure voter eligibility and data integrity. It utilizes a hybrid database architecture, leveraging PostgreSQL for immutable government citizen registries and MongoDB for flexible user authentication.
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat&logo=next.js)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react)
+![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css)
+![Framer Motion](https://img.shields.io/badge/Animation-Framer_Motion-black?style=flat&logo=framer)
+![License](https://img.shields.io/badge/License-ISC-blue?style=flat)
+
+**Vote Guard** is a secure electronic voting system prototype designed to ensure voter eligibility and data integrity. This repository contains the **Frontend** application, providing a modern, responsive user interface for voters to register, authenticate, and cast their votes securely.
+
+The system interacts with the [Vote Guard Server](https://github.com/mouniksai/vote-guard-server) (Backend) to handle data persistence and business logic.
+
+---
+
+##  Table of Contents
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Running the Application](#running-the-application)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## Features
 
-- **Citizen Verification**: Verifies user identity against a simulated Government Node (PostgreSQL).
-- **Hybrid Database System**:
-  - **PostgreSQL**: Stores sensitive citizen data (Government Registry).
-  - **MongoDB**: Handles user accounts and application-specific data.
-- **Secure Authentication**:
-  - Password hashing using `bcryptjs`.
-  - Prevents duplicate registration for the same Citizen ID.
-- **Modern Frontend**: Built with Next.js and styled with Tailwind CSS.
+### User Authentication & Security
+* **Secure Login & Registration:** Seamless onboarding flows.
+* **Multi-Factor Authentication (MFA):** Enhanced security via Email & Mobile OTP integration.
+* **Identity Verification:** Real-time validation of Citizen IDs against a simulated Government Registry.
+
+### Voter Dashboard
+* **Personalized Hub:** A dedicated space for voters to view their status.
+* **Election Tracking:** View details for upcoming, active, and past elections.
+
+### Voting Interface
+* **Secure Casting:** robust mechanism to ensure votes are cast anonymously and securely.
+* **Candidate Insights:** Detailed display of candidate profiles and manifestos to inform voters.
+
+### Modern UI/UX
+* **Responsive Design:** Built with **Tailwind CSS** for a flawless experience on mobile, tablet, and desktop.
+* **Smooth Interactions:** Fluid animations and transitions powered by **Framer Motion**.
+
+---
 
 ## Tech Stack
 
-- **Frontend**: Next.js, React, Tailwind CSS
-- **Backend**: Node.js, Express.js
-- **Databases**: PostgreSQL, MongoDB
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Framework** | Next.js 14 | React framework with App Router |
+| **Library** | React 18 | UI component library |
+| **Styling** | Tailwind CSS | Utility-first CSS framework |
+| **Animations** | Framer Motion | Production-ready animation library |
+| **Icons** | Lucide React | Beautiful & consistent icon pack |
 
-## Getting Started
+---
 
-### Prerequisites
+## Project Structure
 
-- Node.js (v14 or higher)
-- PostgreSQL installed and running
-- MongoDB installed and running
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd vote-guard
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   # Install root dependencies (Next.js)
-   npm install
-
-   # Install server dependencies
-   cd server
-   npm install
-   cd ..
-   ```
-
-### Database Setup
-
-#### 1. PostgreSQL (Government Node)
-Create a database (e.g., `vote_guard`) and a table named `citizens`:
-
-```sql
-CREATE TABLE citizens (
-    citizen_id VARCHAR(50) PRIMARY KEY,
-    full_name VARCHAR(100),
-    email VARCHAR(100),
-    mobile VARCHAR(20)
-);
-
--- Insert dummy data for testing
-INSERT INTO citizens (citizen_id, full_name, email, mobile) VALUES ('CIT-12345', 'Alice Smith', 'alice@example.com', '555-0199');
 ```
+vote-guard/
+├── app/                  # Next.js App Router pages and layouts
+│   ├── login/            # Authentication pages
+│   ├── dashboard/        # Voter dashboard (Protected routes)
+│   ├── admin/            # Admin interface
+│   ├── layout.js         # Root layout
+│   └── page.js           # Entry point (Landing page)
+├── components/           # Reusable UI components
+├── public/               # Static assets (images, fonts)
+├── styles/               # Global styles (globals.css)
+├── middleware.js         # Edge middleware for route protection
+├── next.config.js        # Next.js configuration
+├── tailwind.config.js    # Tailwind CSS configuration
+└── package.json          # Project dependencies and scripts
 
-#### 2. MongoDB
-Ensure your MongoDB instance is running. The application will automatically create the `users` collection upon the first successful registration.
+```
+## Getting Started
+**Prerequisites**
 
-### Running the Application
+    Node.js (v18 or higher recommended)
 
-To start the development environment (Frontend + Backend):
+    npm or yarn package manager
 
-```bash
+**Installation**
+
+  Clone the repository:
+    
+  git clone [https://github.com/mouniksai/vote-guard.git](https://github.com/mouniksai/vote-guard.git)
+  ```
+    cd vote-guard
+   ```
+  Install dependencies:
+   ```
+    npm install
+    # or
+    yarn install
+   ```
+
+## Configuration
+
+Create a .env.local file in the root directory to configure your environment variables.
+```
+  # URL of the Vote Guard Backend Server
+  NEXT_PUBLIC_API_URL=http://localhost:5001/api
+```
+    Note: Ensure your backend server is running on the specified port before starting the frontend.
+
+## Running the Application
+
+Development Mode:
+```
 npm run dev
 ```
+Open http://localhost:3000 with your browser to see the result.
 
-> **Note**: Ensure your `package.json` is configured to run both the Next.js app (port 3000) and the Express server (port 5000) concurrently.
+Production Build:
+```
+npm run build
+npm start
+```
 
-## 📡 API Endpoints
+## Contributing
 
-The Express server runs on port `5000`.
+We welcome contributions! Please follow these steps:
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/verify-citizen` | Checks if a Citizen ID exists in the Government Registry (Postgres). |
-| `POST` | `/api/register` | Registers a new user in MongoDB if the Citizen ID is valid and not taken. |
-| `POST` | `/api/login` | Authenticates a user and retrieves linked citizen details from Postgres. |
+  Fork the repository.
+
+  Create a new feature branch:
+   ```
+    git checkout -b feature/YourFeature
+  ```
+  Commit your changes:
+  ```
+    git commit -m 'Add some feature'
+  ```
+  Push to the branch:
+  ```
+    git push origin feature/YourFeature
+  ```
+  Open a Pull Request.
+
+## License
+
+This project is licensed under the MIT License.

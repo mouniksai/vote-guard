@@ -87,7 +87,7 @@ vote-guard/
 
   Clone the repository:
     
-  git clone [https://github.com/your-username/vote-guard-frontend.git](https://github.com/your-username/vote-guard-frontend.git)
+  git clone [https://github.com/mouniksai/vote-guard.git](https://github.com/mouniksai/vote-guard.git)
   ```
     cd vote-guard
    ```

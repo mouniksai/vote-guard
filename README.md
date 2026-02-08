@@ -59,7 +59,7 @@ The system interacts with the [Vote Guard Server](https://github.com/mouniksai/v
 
 ## Project Structure
 
-```bash
+```
 vote-guard/
 ├── app/                  # Next.js App Router pages and layouts
 │   ├── login/            # Authentication pages
@@ -76,3 +76,71 @@ vote-guard/
 └── package.json          # Project dependencies and scripts
 
 ```
+## Getting Started
+**Prerequisites**
+
+    Node.js (v18 or higher recommended)
+
+    npm or yarn package manager
+
+**Installation**
+
+  Clone the repository:
+    
+  git clone [https://github.com/your-username/vote-guard-frontend.git](https://github.com/your-username/vote-guard-frontend.git)
+  ```
+    cd vote-guard
+   ```
+  Install dependencies:
+   ```
+    npm install
+    # or
+    yarn install
+   ```
+
+## Configuration
+
+Create a .env.local file in the root directory to configure your environment variables.
+```
+  # URL of the Vote Guard Backend Server
+  NEXT_PUBLIC_API_URL=http://localhost:5001/api
+```
+    Note: Ensure your backend server is running on the specified port before starting the frontend.
+
+## Running the Application
+
+Development Mode:
+```
+npm run dev
+```
+Open http://localhost:3000 with your browser to see the result.
+
+Production Build:
+```
+npm run build
+npm start
+```
+
+## Contributing
+
+We welcome contributions! Please follow these steps:
+
+  Fork the repository.
+
+  Create a new feature branch:
+   ```
+    git checkout -b feature/YourFeature
+  ```
+  Commit your changes:
+  ```
+    git commit -m 'Add some feature'
+  ```
+  Push to the branch:
+  ```
+    git push origin feature/YourFeature
+  ```
+  Open a Pull Request.
+
+## License
+
+This project is licensed under the ISC License.

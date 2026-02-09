@@ -237,7 +237,7 @@ export default function VoteHistoryPage() {
                                     <History size={48} className="text-slate-600" />
                                 </div>
                                 <h2 className="text-2xl font-bold text-white mb-2">No Voting History</h2>
-                                <p className="text-slate-400 mb-6">You haven't cast any votes yet</p>
+                                <p className="text-slate-400 mb-6">You havent cast any votes yet</p>
                                 <button
                                     onClick={() => router.push('/dashboard')}
                                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all"

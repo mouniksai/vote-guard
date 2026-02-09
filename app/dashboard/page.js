@@ -67,9 +67,9 @@ export default function VoteGuardDashboard() {
             return;
         }
         fetchDashboardData();
-    }, [router]);
+    }, [router, fetchDashboardData]);
 
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = React.useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -104,7 +104,7 @@ export default function VoteGuardDashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [router]);
 
     const handleSignOut = async () => {
         try {

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 
 // Global API Configuration
-const API_BASE_URL = 'http://localhost:5001';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 // Cookie utilities for authentication
 const getCookie = (name) => {
@@ -176,8 +176,8 @@ export default function ResultsPage() {
                                     key={filter}
                                     onClick={() => setFilterStatus(filter)}
                                     className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${filterStatus === filter
-                                            ? 'bg-blue-600 text-white'
-                                            : 'text-slate-400 hover:text-white'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'text-slate-400 hover:text-white'
                                         }`}
                                 >
                                     {filter.charAt(0).toUpperCase() + filter.slice(1)}
@@ -224,8 +224,8 @@ export default function ResultsPage() {
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${selectedElection?.id === election.id
-                                                        ? 'border-blue-500 bg-blue-500/10'
-                                                        : 'border-slate-700/30 bg-slate-900/40 hover:border-slate-600'
+                                                    ? 'border-blue-500 bg-blue-500/10'
+                                                    : 'border-slate-700/30 bg-slate-900/40 hover:border-slate-600'
                                                     }`}
                                                 onClick={() => handleElectionSelect(election)}
                                             >
@@ -392,8 +392,8 @@ const ElectionResultDetails = ({ election }) => {
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: index * 0.1 }}
                                     className={`p-6 rounded-xl border-2 ${isWinner
-                                            ? 'border-yellow-500/50 bg-yellow-500/5'
-                                            : 'border-slate-700/30 bg-slate-900/40'
+                                        ? 'border-yellow-500/50 bg-yellow-500/5'
+                                        : 'border-slate-700/30 bg-slate-900/40'
                                         }`}
                                 >
                                     <div className="flex items-center justify-between mb-4">
@@ -428,8 +428,8 @@ const ElectionResultDetails = ({ election }) => {
                                             animate={{ width: `${percentage}%` }}
                                             transition={{ duration: 1, delay: index * 0.1 }}
                                             className={`h-2 rounded-full ${isWinner
-                                                    ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
-                                                    : 'bg-gradient-to-r from-blue-600 to-blue-500'
+                                                ? 'bg-gradient-to-r from-yellow-500 to-yellow-400'
+                                                : 'bg-gradient-to-r from-blue-600 to-blue-500'
                                                 }`}
                                         />
                                     </div>

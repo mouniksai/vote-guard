@@ -40,7 +40,7 @@ export default function AdminDashboard() {
                 }
 
                 // Validate token with server
-                const authRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/validate-token`, {
+                const authRes = await fetch('http://localhost:5001/api/admin/validate-token', {
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
 
         const fetchStats = async () => {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/stats`, {
+                const res = await fetch('http://localhost:5001/api/admin/stats', {
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
@@ -106,7 +106,7 @@ export default function AdminDashboard() {
 
         const authCheckInterval = setInterval(async () => {
             try {
-                const authRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/validate-token`, {
+                const authRes = await fetch('http://localhost:5001/api/admin/validate-token', {
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -252,7 +252,7 @@ const CreateElectionForm = () => {
         // REMOVED: const token = localStorage.getItem('voteGuardToken');
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/create-election`, {
+            const res = await fetch('http://localhost:5001/api/admin/create-election', {
                 method: 'POST',
 
                 // NEW: This attaches the cookie automatically
@@ -355,7 +355,7 @@ const AddCandidateForm = () => {
         const fetchElections = async () => {
             // REMOVED: const token = localStorage.getItem('voteGuardToken');
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/elections`, {
+            const res = await fetch('http://localhost:5001/api/admin/elections', {
                 // NEW: Automatically attach the admin cookie
                 credentials: 'include'
                 // REMOVED: headers: { 'Authorization': ... }
@@ -382,7 +382,7 @@ const AddCandidateForm = () => {
         };
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/admin/add-candidate`, {
+            const res = await fetch('http://localhost:5001/api/admin/add-candidate', {
                 method: 'POST',
 
                 // NEW: Automatically attach the admin cookie

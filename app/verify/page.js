@@ -45,7 +45,7 @@ export default function VerificationPage() {
             }
 
             // 2. Send to Backend
-            const res = await fetch('http://localhost:5001/api/verification/face', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/verification/face`, {
                 method: 'POST',
 
                 // NEW: Send the Secure Cookie automatically
@@ -113,7 +113,7 @@ export default function VerificationPage() {
 
         try {
             // We use credentials: 'include' so the browser sends the cookie automatically
-            const res = await fetch('http://localhost:5001/api/verification/token', {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/verification/token`, {
                 method: 'POST',
                 credentials: 'include', // <--- IMPORTANT: Sends the HTTP-Only Cookie
                 headers: {

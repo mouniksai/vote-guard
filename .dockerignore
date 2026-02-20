@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.env
+.env.local
+blockchain_data.json
+*.log
+.git/
+vote-guard-server/node_modules/
+vote-guard-server/.env
+vote-guard-server/blockchain_data.json

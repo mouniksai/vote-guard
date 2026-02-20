@@ -22,9 +22,8 @@ RUN npm install
 COPY . .
 
 # Build Next.js for production
-# NEXT_PUBLIC_API_URL is empty so frontend calls go to same origin (/api/*)
-# next.config.js rewrites proxy them to Express backend
-ENV NEXT_PUBLIC_API_URL=""
+# No NEXT_PUBLIC_API_URL set → fetch calls use relative URLs (/api/...)
+# next.config.js rewrites proxy /api/* to Express on port 5001
 RUN npm run build
 
 # --- RUNTIME ENVIRONMENT ---

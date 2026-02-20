@@ -6,7 +6,7 @@
 class KeyExchangeClient {
     constructor() {
         this.publicKey = null;
-        this.apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+        this.apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || '';
     }
 
     /**

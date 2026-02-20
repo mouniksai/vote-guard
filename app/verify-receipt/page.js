@@ -44,7 +44,7 @@ export default function VerifyReceiptPage() {
         setVerificationResult(null);
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/vote/verify-receipt`, {
+            const response = await fetch('http://localhost:5001/api/vote/verify-receipt', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

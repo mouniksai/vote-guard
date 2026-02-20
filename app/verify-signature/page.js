@@ -18,7 +18,7 @@ export default function VerifySignaturePage() {
     setResult(null);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/vote/verify-signature`, {
+      const res = await fetch('http://localhost:5001/api/vote/verify-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

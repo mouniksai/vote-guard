@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 // Global API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+const API_BASE_URL = 'http://localhost:5001';
 
 // Cookie utilities for authentication
 const setCookie = (name, value, days = 7) => {

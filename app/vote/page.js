@@ -134,7 +134,7 @@ export default function VoteGuardBallot() {
     useEffect(() => {
         const tryBackendData = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/vote/ballot`, {
+                const response = await fetch('http://localhost:5001/api/vote/ballot', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -205,7 +205,7 @@ export default function VoteGuardBallot() {
                     candidateId: selectedCandidate
                 };
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001'}/api/vote/cast`, {
+                const response = await fetch('http://localhost:5001/api/vote/cast', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

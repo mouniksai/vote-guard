@@ -27,7 +27,7 @@ jobs:
 
       - name: Inject .env file from GitHub secret
         run: |
-          echo "${{ secrets.DOTENV_FILE }}" > frontend/vote-guard-server/.env
+          printf '%s' "${{ secrets.DOTENV_FILE }}" > frontend/vote-guard-server/.env
 
       - name: Install git-lfs
         run: |

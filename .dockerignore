@@ -1,8 +1,0 @@
-node_modules/
-.next/
-.env.local
-*.log
-.git/
-.github/
-vote-guard-server/node_modules/
-vote-guard-server/blockchain_data.json

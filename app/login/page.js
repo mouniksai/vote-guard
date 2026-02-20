@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 // Global API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_BASE_URL = 'http://localhost:5001';
 
 // Cookie utilities for authentication
 const setCookie = (name, value, days = 7) => {
@@ -422,10 +422,10 @@ const RegisterWizard = ({ onRegistrationSuccess }) => {
 const RESEND_TIME = 30;
 
 const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
-    const [step, setStep] = useState("email"); // Skip dummy mobile step
+    const [step, setStep] = useState("mobile");
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
-    const [sent, setSent] = useState(true); // OTP was already sent by backend during Sign In!
+    const [sent, setSent] = useState(false);
     const [resendTimer, setResendTimer] = useState(0);
 
     useEffect(() => {

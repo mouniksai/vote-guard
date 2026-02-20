@@ -1,13 +1,3 @@
----
-title: VoteGuard
-emoji: 🗳️
-colorFrom: blue
-colorTo: red
-sdk: docker
-app_port: 7860
-pinned: false
----
-
 # Vote Guard
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat&logo=next.js)

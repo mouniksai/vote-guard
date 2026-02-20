@@ -43,6 +43,9 @@ jobs:
           git lfs install
           git config user.email "ci@voteguard.com"
           git config user.name "VoteGuard CI"
+
+          # Force-add backend files (overrides .gitignore which excludes vote-guard-server/)
+          git add --force vote-guard-server/
           git add -A
           git commit -m "Deploy: frontend + backend ($(date '+%Y-%m-%d %H:%M'))" --allow-empty
           git push --force https://USER:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE} HEAD:main

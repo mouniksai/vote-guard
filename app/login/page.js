@@ -422,10 +422,10 @@ const RegisterWizard = ({ onRegistrationSuccess }) => {
 const RESEND_TIME = 30;
 
 const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
-    const [step, setStep] = useState("mobile");
+    const [step, setStep] = useState("email"); // Skip dummy mobile step
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
-    const [sent, setSent] = useState(false);
+    const [sent, setSent] = useState(true); // OTP was already sent by backend during Sign In!
     const [resendTimer, setResendTimer] = useState(0);
 
     useEffect(() => {

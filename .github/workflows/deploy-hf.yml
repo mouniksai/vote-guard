@@ -23,6 +23,10 @@ jobs:
       - name: Remove nested .git
         run: rm -rf frontend/vote-guard-server/.git
 
+      - name: Inject .env file from GitHub secret
+        run: |
+          echo "${{ secrets.DOTENV_FILE }}" > frontend/vote-guard-server/.env
+
       - name: Push to Hugging Face Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

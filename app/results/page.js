@@ -10,8 +10,8 @@ import {
     Download, Share2, Filter, RefreshCw, Loader2, AlertCircle
 } from 'lucide-react';
 
-// Global API Configuration
-const API_BASE_URL = 'http://localhost:5001';
+// Global API Configuration - Uses environment variable
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 // Cookie utilities for authentication
 const getCookie = (name) => {

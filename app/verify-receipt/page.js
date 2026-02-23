@@ -17,6 +17,9 @@ import {
     ArrowLeft
 } from 'lucide-react';
 
+// API Base URL from environment variable
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 export default function VerifyReceiptPage() {
     const router = useRouter();
     const [inputType, setInputType] = useState('base64'); // 'base64' or 'barcode'
@@ -44,7 +47,7 @@ export default function VerifyReceiptPage() {
         setVerificationResult(null);
 
         try {
-            const response = await fetch('http://localhost:5001/api/vote/verify-receipt', {
+            const response = await fetch(`${API_BASE_URL}/api/vote/verify-receipt`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

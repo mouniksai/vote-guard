@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ShieldCheck,
     CheckCircle2,
@@ -111,6 +111,7 @@ const CANDIDATES = [
 
 export default function VoteGuardBallot() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState('ballot');
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [expandedCandidate, setExpandedCandidate] = useState(null);
@@ -119,6 +120,9 @@ export default function VoteGuardBallot() {
     const [voteTimestamp, setVoteTimestamp] = useState(null); // Store actual vote timestamp
     const [blockchainProof, setBlockchainProof] = useState(null); // Blockchain block info
     const [timeLeft, setTimeLeft] = useState(5 * 60); // 5 minutes in seconds
+
+    // Get election ID from query params
+    const electionId = searchParams.get('electionId');
 
     // Backend integration state
     const [backendData, setBackendData] = useState({
@@ -130,11 +134,19 @@ export default function VoteGuardBallot() {
     const [usingBackend, setUsingBackend] = useState(false);
     const [backendError, setBackendError] = useState('');
 
+    // API Base URL from environment variable
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
     // Try to fetch data from backend on mount
     useEffect(() => {
         const tryBackendData = async () => {
             try {
-                const response = await fetch('http://localhost:5001/api/vote/ballot', {
+                // Build URL with electionId if available
+                const url = electionId
+                    ? `${API_BASE_URL}/api/vote/ballot?electionId=${encodeURIComponent(electionId)}`
+                    : `${API_BASE_URL}/api/vote/ballot`;
+
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -171,7 +183,7 @@ export default function VoteGuardBallot() {
         };
 
         tryBackendData();
-    }, []);
+    }, [electionId]); // Re-fetch if electionId changes
 
     // Timer countdown
     useEffect(() => {
@@ -205,7 +217,7 @@ export default function VoteGuardBallot() {
                     candidateId: selectedCandidate
                 };
 
-                const response = await fetch('http://localhost:5001/api/vote/cast', {
+                const response = await fetch(`${API_BASE_URL}/api/vote/cast`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -233,14 +245,20 @@ export default function VoteGuardBallot() {
                     setCurrentStep('confirmed');
                     return;
                 } else {
-                    console.error('Backend vote failed:', result.message);
+                    // Backend error - show to user and reset
+                    alert(`❌ Vote Failed: ${result.message || 'Unknown error'}\n\nDetails: ${result.details || ''}`);
+                    setCurrentStep('voting');
+                    return;
                 }
             } catch (error) {
                 console.error('Vote casting error:', error);
+                alert(`❌ Network Error: Unable to reach voting server\n\n${error.message}`);
+                setCurrentStep('voting');
+                return;
             }
         }
 
-        // Fallback to mock transaction
+        // Fallback to mock transaction (only if not using backend)
         setTimeout(() => {
             setReceiptHash(`0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 8)}`);
             setCurrentStep('confirmed');

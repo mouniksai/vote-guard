@@ -16,6 +16,9 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+// API Base URL from environment variable
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState(null);
@@ -40,7 +43,7 @@ export default function AdminDashboard() {
                 }
 
                 // Validate token with server
-                const authRes = await fetch('http://localhost:5001/api/admin/validate-token', {
+                const authRes = await fetch(`${API_BASE_URL}/api/admin/validate-token`, {
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
@@ -75,7 +78,7 @@ export default function AdminDashboard() {
 
         const fetchStats = async () => {
             try {
-                const res = await fetch('http://localhost:5001/api/admin/stats', {
+                const res = await fetch(`${API_BASE_URL}/api/admin/stats`, {
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json'
@@ -106,7 +109,7 @@ export default function AdminDashboard() {
 
         const authCheckInterval = setInterval(async () => {
             try {
-                const authRes = await fetch('http://localhost:5001/api/admin/validate-token', {
+                const authRes = await fetch(`${API_BASE_URL}/api/admin/validate-token`, {
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -242,6 +245,14 @@ const OverviewPanel = ({ stats }) => (
 // --- SUB-COMPONENT: CREATE ELECTION FORM ---
 const CreateElectionForm = () => {
     const [loading, setLoading] = useState(false);
+
+    // Helper to get current datetime in local format for datetime-local input
+    const getMinDateTime = () => {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 5); // Default to 5 minutes from now
+        return now.toISOString().slice(0, 16);
+    };
+
     const [formData, setFormData] = useState({
         title: '', description: '', constituency: 'General', startTime: '', endTime: ''
     });
@@ -252,7 +263,7 @@ const CreateElectionForm = () => {
         // REMOVED: const token = localStorage.getItem('voteGuardToken');
 
         try {
-            const res = await fetch('http://localhost:5001/api/admin/create-election', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/create-election`, {
                 method: 'POST',
 
                 // NEW: This attaches the cookie automatically
@@ -264,8 +275,11 @@ const CreateElectionForm = () => {
                 },
                 body: JSON.stringify(formData)
             });
+
+            const data = await res.json();
+
             if (res.ok) {
-                alert("Election Created Successfully!");
+                alert("✅ Election Created Successfully!");
                 // Reset form fields after successful submission using setTimeout to ensure it happens after alert
                 setTimeout(() => {
                     setFormData({
@@ -273,7 +287,10 @@ const CreateElectionForm = () => {
                     });
                 }, 100);
             } else {
-                alert("Failed to create election");
+                // Display detailed error message from backend
+                const errorMsg = data.message || "Failed to create election";
+                const errorDetails = data.details ? `\n\n${data.details}` : '';
+                alert(`❌ ${errorMsg}${errorDetails}`);
             }
         } catch (err) { alert("Error connecting to server"); }
         setLoading(false);
@@ -292,6 +309,7 @@ const CreateElectionForm = () => {
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:ring-2 focus:ring-blue-500 outline-none"
                         placeholder="e.g. 2026 General Election"
                         value={formData.title}
+                        required
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
                 </div>
@@ -319,19 +337,27 @@ const CreateElectionForm = () => {
                 </div>
                 <div>
                     <label className="block text-sm text-slate-400 mb-2">Start Time</label>
-                    <input type="datetime-local"
+                    <input
+                        type="datetime-local"
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white outline-none"
                         value={formData.startTime}
+                        min={getMinDateTime()}
+                        required
                         onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                     />
+                    <p className="text-xs text-slate-500 mt-1">Must be in the future</p>
                 </div>
                 <div>
                     <label className="block text-sm text-slate-400 mb-2">End Time</label>
-                    <input type="datetime-local"
+                    <input
+                        type="datetime-local"
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white outline-none"
                         value={formData.endTime}
+                        min={formData.startTime || getMinDateTime()}
+                        required
                         onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                     />
+                    <p className="text-xs text-slate-500 mt-1">Must be after start time</p>
                 </div>
             </div>
 
@@ -355,16 +381,18 @@ const AddCandidateForm = () => {
         const fetchElections = async () => {
             // REMOVED: const token = localStorage.getItem('voteGuardToken');
 
-            const res = await fetch('http://localhost:5001/api/admin/elections', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/elections`, {
                 // NEW: Automatically attach the admin cookie
                 credentials: 'include'
                 // REMOVED: headers: { 'Authorization': ... }
             });
             if (res.ok) {
                 const allElections = await res.json();
-                // Filter to show only LIVE elections
-                const liveElections = allElections.filter(election => election.status === 'LIVE');
-                setElections(liveElections);
+                // Show UPCOMING and LIVE elections (exclude only ENDED elections)
+                const activeElections = allElections.filter(election =>
+                    election.status === 'LIVE' || election.status === 'UPCOMING'
+                );
+                setElections(activeElections);
             }
         };
         fetchElections();
@@ -382,7 +410,7 @@ const AddCandidateForm = () => {
         };
 
         try {
-            const res = await fetch('http://localhost:5001/api/admin/add-candidate', {
+            const res = await fetch(`${API_BASE_URL}/api/admin/add-candidate`, {
                 method: 'POST',
 
                 // NEW: Automatically attach the admin cookie
@@ -394,8 +422,11 @@ const AddCandidateForm = () => {
                 },
                 body: JSON.stringify(payload)
             });
+
+            const data = await res.json();
+
             if (res.ok) {
-                alert("Candidate Added Successfully!");
+                alert("✅ Candidate Added Successfully!");
                 // Reset form fields after successful submission using setTimeout to ensure it happens after alert
                 setTimeout(() => {
                     setFormData({
@@ -403,9 +434,14 @@ const AddCandidateForm = () => {
                     });
                 }, 100);
             } else {
-                alert("Failed to add candidate");
+                const errorMsg = data.message || "Failed to add candidate";
+                const errorDetails = data.error ? `\n\nError: ${data.error}` : '';
+                alert(`❌ ${errorMsg}${errorDetails}`);
             }
-        } catch (err) { alert("Error connecting to server"); }
+        } catch (err) {
+            console.error('Add candidate error:', err);
+            alert("❌ Error connecting to server");
+        }
         setLoading(false);
     };
     return (
@@ -420,28 +456,45 @@ const AddCandidateForm = () => {
                     <select
                         className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white outline-none"
                         value={formData.electionId}
+                        required
                         onChange={(e) => setFormData({ ...formData, electionId: e.target.value })}
                     >
                         <option value="">-- Choose Election --</option>
-                        {elections.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
+                        {elections.map(e => (
+                            <option key={e.id} value={e.id}>
+                                {e.title} ({e.status}) - {e.constituency}
+                            </option>
+                        ))}
                     </select>
+                    {elections.length === 0 && (
+                        <p className="text-xs text-amber-400 mt-1">
+                            ⚠️ No active elections found. Create an election first.
+                        </p>
+                    )}
                 </div>
                 <div className="col-span-1">
                     <label className="block text-sm text-slate-400 mb-2">Candidate Name</label>
                     <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white outline-none"
                         value={formData.name}
+                        required
+                        placeholder="Full name"
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                 </div>
                 <div className="col-span-1">
                     <label className="block text-sm text-slate-400 mb-2">Party Name</label>
                     <input className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white outline-none"
                         value={formData.party}
+                        required
+                        placeholder="Political party"
                         onChange={(e) => setFormData({ ...formData, party: e.target.value })} />
                 </div>
                 <div className="col-span-1">
                     <label className="block text-sm text-slate-400 mb-2">Age</label>
                     <input type="number" className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white outline-none"
                         value={formData.age}
+                        required
+                        min="25"
+                        placeholder="Minimum 25"
                         onChange={(e) => setFormData({ ...formData, age: e.target.value })} />
                 </div>
                 <div className="col-span-1">

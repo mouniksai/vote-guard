@@ -22,8 +22,8 @@ import {
     Scan
 } from 'lucide-react';
 
-// Global API Configuration - Change this URL to update backend endpoint everywhere
-const API_BASE_URL = 'http://localhost:5001';
+// Global API Configuration - Uses environment variable for backend endpoint
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
 // Cookie utilities for authentication
 const getCookie = (name) => {
@@ -129,7 +129,8 @@ export default function VoteGuardDashboard() {
 
     const handleVoteClick = () => {
         if (dashboardData?.activeElection) {
-            router.push('/verify');
+            // Pass the specific election ID to ensure the correct election is loaded
+            router.push(`/verify?electionId=${encodeURIComponent(dashboardData.activeElection.id)}`);
         }
     };
 

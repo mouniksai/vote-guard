@@ -129,7 +129,8 @@ export default function VoteGuardDashboard() {
 
     const handleVoteClick = () => {
         if (dashboardData?.activeElection) {
-            router.push('/verify');
+            // Pass the specific election ID to ensure the correct election is loaded
+            router.push(`/verify?electionId=${encodeURIComponent(dashboardData.activeElection.id)}`);
         }
     };
 

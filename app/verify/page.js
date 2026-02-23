@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Webcam from 'react-webcam'; // NEW IMPORT
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ShieldCheck,
     ScanFace,
@@ -17,10 +17,14 @@ import {
 
 export default function VerificationPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const webcamRef = useRef(null);
     const [stepsCompleted, setStepsCompleted] = useState(0);
     const [loadingStep, setLoadingStep] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
+
+    // Get election ID from query params
+    const electionId = searchParams.get('electionId');
 
     // API Base URL from environment variable
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';

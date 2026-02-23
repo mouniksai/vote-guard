@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
     ShieldCheck,
     CheckCircle2,
@@ -111,6 +111,7 @@ const CANDIDATES = [
 
 export default function VoteGuardBallot() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState('ballot');
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [expandedCandidate, setExpandedCandidate] = useState(null);
@@ -118,6 +119,9 @@ export default function VoteGuardBallot() {
     const [encodedFormats, setEncodedFormats] = useState(null); // Store encoded receipt formats
     const [voteTimestamp, setVoteTimestamp] = useState(null); // Store actual vote timestamp
     const [timeLeft, setTimeLeft] = useState(5 * 60); // 5 minutes in seconds
+
+    // Get election ID from query params
+    const electionId = searchParams.get('electionId');
 
     // Backend integration state
     const [backendData, setBackendData] = useState({
@@ -136,7 +140,12 @@ export default function VoteGuardBallot() {
     useEffect(() => {
         const tryBackendData = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/vote/ballot`, {
+                // Build URL with electionId if available
+                const url = electionId
+                    ? `${API_BASE_URL}/api/vote/ballot?electionId=${encodeURIComponent(electionId)}`
+                    : `${API_BASE_URL}/api/vote/ballot`;
+
+                const response = await fetch(url, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -173,7 +182,7 @@ export default function VoteGuardBallot() {
         };
 
         tryBackendData();
-    }, []);
+    }, [electionId]); // Re-fetch if electionId changes
 
     // Timer countdown
     useEffect(() => {

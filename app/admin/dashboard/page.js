@@ -254,7 +254,7 @@ const CreateElectionForm = () => {
     };
 
     const [formData, setFormData] = useState({
-        title: '', description: '', constituency: 'Mumbai South', startTime: '', endTime: ''
+        title: '', description: '', constituency: 'General', startTime: '', endTime: ''
     });
 
     const handleSubmit = async (e) => {
@@ -329,6 +329,7 @@ const CreateElectionForm = () => {
                         value={formData.constituency}
                         onChange={(e) => setFormData({ ...formData, constituency: e.target.value })}
                     >
+                        <option>General</option>
                         <option>Mumbai South</option>
                         <option>Bangalore Central</option>
                         <option>Delhi North</option>

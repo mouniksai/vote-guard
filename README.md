@@ -237,35 +237,79 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Create a database (e.g., `vote_guard`) and a table named `citizens`:
 
-```sql
-CREATE TABLE citizens (
-    citizen_id VARCHAR(50) PRIMARY KEY,
-    full_name VARCHAR(100),
-    email VARCHAR(100),
-    mobile VARCHAR(20)
-);
+---
 
--- Insert dummy data for testing
-INSERT INTO citizens (citizen_id, full_name, email, mobile) VALUES ('CIT-12345', 'Alice Smith', 'alice@example.com', '555-0199');
+## Project Structure
+
 ```
+vote-guard/
+├── app/                  # Next.js App Router pages and layouts
+│   ├── login/            # Authentication pages
+│   ├── dashboard/        # Voter dashboard (Protected routes)
+│   ├── admin/            # Admin interface
+│   ├── layout.js         # Root layout
+│   └── page.js           # Entry point (Landing page)
+├── components/           # Reusable UI components
+├── public/               # Static assets (images, fonts)
+├── styles/               # Global styles (globals.css)
+├── middleware.js         # Edge middleware for route protection
+├── next.config.js        # Next.js configuration
+├── tailwind.config.js    # Tailwind CSS configuration
+└── package.json          # Project dependencies and scripts
+
+```
+## Getting Started
+**Prerequisites**
 
 #### 2. MongoDB
 
 Ensure your MongoDB instance is running. The application will automatically create the `users` collection upon the first successful registration.
 
-### Running the Application
+    npm or yarn package manager
 
-To start the development environment (Frontend + Backend):
+**Installation**
 
-```bash
+  Clone the repository:
+    
+  git clone [https://github.com/mouniksai/vote-guard.git](https://github.com/mouniksai/vote-guard.git)
+  ```
+    cd vote-guard
+   ```
+  Install dependencies:
+   ```
+    npm install
+    # or
+    yarn install
+   ```
+
+## Configuration
+
+Create a .env.local file in the root directory to configure your environment variables.
+```
+  # URL of the Vote Guard Backend Server
+  NEXT_PUBLIC_API_URL=http://localhost:5001/api
+```
+    Note: Ensure your backend server is running on the specified port before starting the frontend.
+
+## Running the Application
+
+Development Mode:
+```
 npm run dev
 ```
+Open http://localhost:3000 with your browser to see the result.
 
-> **Note**: Ensure your `package.json` is configured to run both the Next.js app (port 3000) and the Express server (port 5000) concurrently.
+Production Build:
+```
+npm run build
+npm start
+```
 
-## 📡 API Endpoints
+## Contributing
 
-The Express server runs on port `5000`.
+We welcome contributions! Please follow these steps:
+
+  Fork the repository.
 
 | Method | Endpoint              | Description                                                               |
 | ------ | --------------------- | ------------------------------------------------------------------------- |

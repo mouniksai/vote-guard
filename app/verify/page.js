@@ -22,6 +22,9 @@ export default function VerificationPage() {
     const [loadingStep, setLoadingStep] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
 
+    // API Base URL from environment variable
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
     // Debug logging
     useEffect(() => {
         console.log('VerificationPage state:', {
@@ -45,7 +48,7 @@ export default function VerificationPage() {
             }
 
             // 2. Send to Backend
-            const res = await fetch('http://localhost:5001/api/verification/face', {
+            const res = await fetch(`${API_BASE_URL}/api/verification/face`, {
                 method: 'POST',
 
                 // NEW: Send the Secure Cookie automatically
@@ -113,7 +116,7 @@ export default function VerificationPage() {
 
         try {
             // We use credentials: 'include' so the browser sends the cookie automatically
-            const res = await fetch('http://localhost:5001/api/verification/token', {
+            const res = await fetch(`${API_BASE_URL}/api/verification/token`, {
                 method: 'POST',
                 credentials: 'include', // <--- IMPORTANT: Sends the HTTP-Only Cookie
                 headers: {

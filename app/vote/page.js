@@ -129,11 +129,14 @@ export default function VoteGuardBallot() {
     const [usingBackend, setUsingBackend] = useState(false);
     const [backendError, setBackendError] = useState('');
 
+    // API Base URL from environment variable
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
     // Try to fetch data from backend on mount
     useEffect(() => {
         const tryBackendData = async () => {
             try {
-                const response = await fetch('http://localhost:5001/api/vote/ballot', {
+                const response = await fetch(`${API_BASE_URL}/api/vote/ballot`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -204,7 +207,7 @@ export default function VoteGuardBallot() {
                     candidateId: selectedCandidate
                 };
 
-                const response = await fetch('http://localhost:5001/api/vote/cast', {
+                const response = await fetch(`${API_BASE_URL}/api/vote/cast`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -228,14 +231,20 @@ export default function VoteGuardBallot() {
                     setCurrentStep('confirmed');
                     return;
                 } else {
-                    console.error('Backend vote failed:', result.message);
+                    // Backend error - show to user and reset
+                    alert(`❌ Vote Failed: ${result.message || 'Unknown error'}\n\nDetails: ${result.details || ''}`);
+                    setCurrentStep('voting');
+                    return;
                 }
             } catch (error) {
                 console.error('Vote casting error:', error);
+                alert(`❌ Network Error: Unable to reach voting server\n\n${error.message}`);
+                setCurrentStep('voting');
+                return;
             }
         }
 
-        // Fallback to mock transaction
+        // Fallback to mock transaction (only if not using backend)
         setTimeout(() => {
             setReceiptHash(`0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 8)}`);
             setCurrentStep('confirmed');

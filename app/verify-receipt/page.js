@@ -17,6 +17,9 @@ import {
     ArrowLeft
 } from 'lucide-react';
 
+// API Base URL from environment variable
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 export default function VerifyReceiptPage() {
     const router = useRouter();
     const [inputType, setInputType] = useState('base64'); // 'base64' or 'barcode'
@@ -44,7 +47,7 @@ export default function VerifyReceiptPage() {
         setVerificationResult(null);
 
         try {
-            const response = await fetch('http://localhost:5001/api/vote/verify-receipt', {
+            const response = await fetch(`${API_BASE_URL}/api/vote/verify-receipt`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -148,8 +151,8 @@ export default function VerifyReceiptPage() {
                                     setVerificationResult(null);
                                 }}
                                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${inputType === 'base64'
-                                        ? 'bg-blue-600 text-white border-2 border-blue-500'
-                                        : 'bg-slate-700/50 text-slate-300 border-2 border-slate-600 hover:bg-slate-700'
+                                    ? 'bg-blue-600 text-white border-2 border-blue-500'
+                                    : 'bg-slate-700/50 text-slate-300 border-2 border-slate-600 hover:bg-slate-700'
                                     }`}
                             >
                                 <FileText size={18} />
@@ -163,8 +166,8 @@ export default function VerifyReceiptPage() {
                                     setVerificationResult(null);
                                 }}
                                 className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${inputType === 'barcode'
-                                        ? 'bg-blue-600 text-white border-2 border-blue-500'
-                                        : 'bg-slate-700/50 text-slate-300 border-2 border-slate-600 hover:bg-slate-700'
+                                    ? 'bg-blue-600 text-white border-2 border-blue-500'
+                                    : 'bg-slate-700/50 text-slate-300 border-2 border-slate-600 hover:bg-slate-700'
                                     }`}
                             >
                                 <Hash size={18} />

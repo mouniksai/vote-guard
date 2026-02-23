@@ -73,6 +73,63 @@ export function isMetaMaskInstalled() {
 }
 
 /**
+ * CRITICAL: Check if user is on Sepolia network
+ * Returns { correct: boolean, currentChainId: string, message: string }
+ */
+export async function checkNetwork() {
+    if (!isMetaMaskInstalled()) {
+        return {
+            correct: false,
+            currentChainId: null,
+            message: 'MetaMask not installed'
+        };
+    }
+
+    try {
+        const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+        const isCorrect = chainId === SEPOLIA_CONFIG.chainId;
+
+        return {
+            correct: isCorrect,
+            currentChainId: chainId,
+            message: isCorrect
+                ? 'Connected to Sepolia'
+                : `Wrong network. Please switch to Sepolia (Chain ID: ${SEPOLIA_CONFIG.chainId})`
+        };
+    } catch (error) {
+        return {
+            correct: false,
+            currentChainId: null,
+            message: error.message
+        };
+    }
+}
+
+/**
+ * CRITICAL: Enforce Sepolia network before any operation
+ * Throws error if not on Sepolia
+ */
+export async function enforceSepoliaNetwork() {
+    const networkCheck = await checkNetwork();
+
+    if (!networkCheck.correct) {
+        if (!isMetaMaskInstalled()) {
+            throw new Error('MetaMask not installed. Install from: https://metamask.io/download/');
+        }
+
+        // Try to switch to Sepolia
+        try {
+            await switchToSepolia();
+            return true;
+        } catch (switchError) {
+            throw new Error(`You must be on Sepolia network. Current: ${networkCheck.currentChainId}`);
+        }
+    }
+
+    return true;
+}
+
+/**
  * Connect to MetaMask wallet
  * @returns {Promise<string>} Connected wallet address
  */
@@ -82,6 +139,9 @@ export async function connectWallet() {
     }
 
     try {
+        // First, ensure we're on Sepolia
+        await enforceSepoliaNetwork();
+
         const accounts = await window.ethereum.request({
             method: 'eth_requestAccounts'
         });
@@ -158,7 +218,7 @@ export function getContractForReading() {
     const alchemyKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
     const rpcUrl = alchemyKey
         ? `https://eth-sepolia.g.alchemy.com/v2/${alchemyKey}`
-        : 'https://rpc.sepolia.org'; // Fallback to public RPC
+        : process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.sepolia.org'; // Fallback to public RPC
 
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
@@ -167,6 +227,7 @@ export function getContractForReading() {
 /**
  * Get contract instance for WRITE operations (uses signer)
  * WALLET REQUIRED - User pays gas fees
+ * STRICTLY enforces Sepolia network
  */
 export async function getContractForWriting() {
     if (!CONTRACT_ADDRESS) {
@@ -177,8 +238,8 @@ export async function getContractForWriting() {
         throw new Error('MetaMask not installed');
     }
 
-    // Ensure on Sepolia network
-    await switchToSepolia();
+    // CRITICAL: Enforce Sepolia network before ANY write operation
+    await enforceSepoliaNetwork();
 
     // Get provider from MetaMask
     const provider = new ethers.BrowserProvider(window.ethereum);

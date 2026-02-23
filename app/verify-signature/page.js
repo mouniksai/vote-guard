@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { Shield, CheckCircle, XCircle, Hash, Lock } from 'lucide-react';
 
+// API Base URL from environment variable
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+
 export default function VerifySignaturePage() {
   const [formData, setFormData] = useState({
     receiptHash: '',
@@ -18,7 +21,7 @@ export default function VerifySignaturePage() {
     setResult(null);
 
     try {
-      const res = await fetch('http://localhost:5001/api/vote/verify-signature', {
+      const res = await fetch(`${API_BASE_URL}/api/vote/verify-signature`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -140,8 +143,8 @@ export default function VerifySignaturePage() {
         {/* Verification Result */}
         {result && (
           <div className={`rounded-lg shadow-lg p-6 ${result.verified
-              ? 'bg-green-50 border-2 border-green-500'
-              : 'bg-red-50 border-2 border-red-500'
+            ? 'bg-green-50 border-2 border-green-500'
+            : 'bg-red-50 border-2 border-red-500'
             }`}>
             <div className="flex items-center gap-3 mb-4">
               {result.verified ? (

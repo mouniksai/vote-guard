@@ -118,6 +118,7 @@ function VoteGuardBallotContent() {
     const [receiptHash, setReceiptHash] = useState('');
     const [encodedFormats, setEncodedFormats] = useState(null); // Store encoded receipt formats
     const [voteTimestamp, setVoteTimestamp] = useState(null); // Store actual vote timestamp
+    const [blockchainProof, setBlockchainProof] = useState(null); // Blockchain block info
     const [timeLeft, setTimeLeft] = useState(5 * 60); // 5 minutes in seconds
 
     // Get election ID from query params
@@ -237,6 +238,10 @@ function VoteGuardBallotContent() {
                     if (result.timestamp) {
                         setVoteTimestamp(result.timestamp);
                     }
+                    // Store blockchain proof data
+                    if (result.blockchain) {
+                        setBlockchainProof(result.blockchain);
+                    }
                     setCurrentStep('confirmed');
                     return;
                 } else {
@@ -354,6 +359,7 @@ function VoteGuardBallotContent() {
                         receiptHash={receiptHash}
                         encodedFormats={encodedFormats}
                         voteTimestamp={voteTimestamp}
+                        blockchainProof={blockchainProof}
                         election={currentData.election}
                         candidate={currentData.candidates.find(c => c.id === selectedCandidate)}
                     />
@@ -657,7 +663,7 @@ const CastingPage = () => (
 );
 
 // Confirmation Page - Enhanced with Encoded Receipts
-const ConfirmationPage = ({ receiptHash, encodedFormats, voteTimestamp, election, candidate }) => {
+const ConfirmationPage = ({ receiptHash, encodedFormats, voteTimestamp, blockchainProof, election, candidate }) => {
     const [copySuccess, setCopySuccess] = useState(false);
 
     const handleCopyReceipt = () => {
@@ -719,6 +725,37 @@ const ConfirmationPage = ({ receiptHash, encodedFormats, voteTimestamp, election
                         <span className="text-slate-400">Timestamp</span>
                         <span className="text-white">{voteTimestamp ? new Date(voteTimestamp).toLocaleString() : new Date().toLocaleString()}</span>
                     </div>
+
+                    {/* Blockchain Proof Section */}
+                    {blockchainProof && (
+                        <div className="mt-4 pt-4 border-t border-slate-700/50">
+                            <p className="text-xs text-slate-500 mb-2 font-semibold flex items-center gap-1">
+                                <span className="text-green-400">⛓️</span> BLOCKCHAIN PROOF
+                            </p>
+                            <div className="space-y-2">
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Block Index</span>
+                                    <span className="font-mono text-green-400 font-bold">#{blockchainProof.blockIndex}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Block Hash</span>
+                                    <span className="font-mono text-white text-xs break-all">{blockchainProof.blockHash?.substring(0, 20)}...</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Merkle Root</span>
+                                    <span className="font-mono text-white text-xs break-all">{blockchainProof.merkleRoot?.substring(0, 20)}...</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Previous Hash</span>
+                                    <span className="font-mono text-white text-xs break-all">{blockchainProof.previousHash?.substring(0, 20)}...</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-slate-400">Mining Nonce</span>
+                                    <span className="font-mono text-blue-400">{blockchainProof.nonce}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 

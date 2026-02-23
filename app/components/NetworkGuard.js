@@ -106,7 +106,7 @@ export default function NetworkGuard({ children }) {
 
                         <div className="bg-red-50 rounded-lg p-4 mb-6 border border-red-200">
                             <p className="text-red-800 font-medium mb-2">
-                                🚫 You're on the wrong blockchain network
+                                🚫 You&apos;re on the wrong blockchain network
                             </p>
                             <p className="text-gray-600 text-sm">
                                 VoteGuard requires <span className="font-bold text-red-600">Sepolia Testnet</span> for all operations.

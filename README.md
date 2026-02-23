@@ -1,3 +1,12 @@
+---
+title: VoteGuard Frontend
+emoji: 🗳️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # VoteGuard - Blockchain-Based Secure Voting System
 
 VoteGuard is a production-ready electronic voting system that combines traditional database authentication with Ethereum blockchain for transparent, tamper-proof vote recording.

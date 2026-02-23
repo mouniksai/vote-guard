@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -109,7 +109,7 @@ const CANDIDATES = [
 ];
 
 
-export default function VoteGuardBallot() {
+function VoteGuardBallotContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [currentStep, setCurrentStep] = useState('ballot');
@@ -921,3 +921,11 @@ const ProcessStep = ({ status, text }) => (
         <span className={`text-sm ${status === 'pending' ? 'text-slate-500' : 'text-slate-300'}`}>{text}</span>
     </div>
 );
+
+export default function VoteGuardBallot() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#0B1121] flex items-center justify-center text-white">Loading Ballot...</div>}>
+            <VoteGuardBallotContent />
+        </Suspense>
+    );
+}

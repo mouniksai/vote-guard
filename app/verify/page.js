@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Webcam from 'react-webcam'; // NEW IMPORT
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -15,7 +15,7 @@ import {
     ArrowRight
 } from 'lucide-react';
 
-export default function VerificationPage() {
+function VerificationContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const webcamRef = useRef(null);
@@ -403,5 +403,13 @@ function VerificationCard({ stepNumber, title, description, icon, isActive, isCo
                 )}
             </button>
         </motion.div>
+    );
+}
+
+export default function VerificationPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#0B1121] flex items-center justify-center text-white">Loading Verification...</div>}>
+            <VerificationContent />
+        </Suspense>
     );
 }

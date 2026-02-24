@@ -197,7 +197,11 @@ const SignInFlow = ({ router }) => {
                     if (data.user) {
                         setCookie('voteGuardUser', JSON.stringify(data.user));
                     }
-                    router.push('/dashboard');
+                    if (data.user && data.user.role === 'admin') {
+                        router.push('/admin/dashboard');
+                    } else {
+                        router.push('/dashboard');
+                    }
                 }
             } else {
                 setError(data.message || "Invalid credentials");
@@ -504,8 +508,12 @@ const TwoFactorAuth = ({ user, userDetails, userId, onBack, router }) => {
                 if (data.user) {
                     setCookie('voteGuardUser', JSON.stringify(data.user));
                 }
-                console.log('Authentication successful, redirecting to dashboard...');
-                router.push('/dashboard');
+                console.log('Authentication successful, redirecting based on role...');
+                if (data.user && data.user.role === 'admin') {
+                    router.push('/admin/dashboard');
+                } else {
+                    router.push('/dashboard');
+                }
             } else {
                 alert(data.message); // Invalid OTP
             }

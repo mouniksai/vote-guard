@@ -30,9 +30,9 @@
 - [Contributing](#contributing)
 - [License](#license)
 
----
+> **[Full Documentation →](https://sanjjiiev.github.io/voteguard-docs/)** — Complete API reference, setup guides, and architecture overview.
 
-## Features
+## Key Features
 
 | Category | Description |
 |:---|:---|
@@ -316,5 +316,3 @@ See [TEAM_SYNC_SETUP_GUIDE.md](TEAM_SYNC_SETUP_GUIDE.md) for multi-member deploy
 This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for details.
 
 ---
-
-<p align="center"><strong>VoteGuard</strong> — Built by the VoteGuard Team | 3rd Year CSE Project</p>

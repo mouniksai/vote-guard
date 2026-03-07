@@ -28,7 +28,7 @@ VoteGuard is a production-ready electronic voting system that combines **Postgre
 
 > **[Full Documentation →](https://sanjjiiev.github.io/voteguard-docs/)** — Complete API reference, setup guides, and architecture overview.
 
-## ✨ Key Features
+## Key Features
 
 | Feature | Description |
 |:---|:---|
@@ -172,5 +172,3 @@ npx hardhat test         # Test contracts
 MIT License — see [LICENSE](LICENSE) for details.
 
 ---
-
-**Made with 🛡️ by the VoteGuard Team** — 3rd Year CSE Project

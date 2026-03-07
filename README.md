@@ -26,7 +26,7 @@ pinned: false
 
 VoteGuard is a production-ready electronic voting system that combines **PostgreSQL** for identity management with **Ethereum blockchain** for transparent, tamper-proof vote recording. Every vote is encrypted, digitally signed, and stored immutably on the Sepolia testnet.
 
-> 📚 **[Full Documentation →](https://mouniksai.github.io/voteguard-docs/)** — Complete API reference, setup guides, and architecture overview.
+> **[Full Documentation →](https://sanjjiiev.github.io/voteguard-docs/)** — Complete API reference, setup guides, and architecture overview.
 
 ## ✨ Key Features
 

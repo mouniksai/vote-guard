@@ -9,310 +9,168 @@ pinned: false
 
 # VoteGuard - Blockchain-Based Secure Voting System
 
-VoteGuard is a production-ready electronic voting system that combines traditional database authentication with Ethereum blockchain for transparent, tamper-proof vote recording.
+<p align="center">
+  <h1 align="center">🛡️ VoteGuard</h1>
+  <p align="center"><strong>Blockchain-Based Secure Electronic Voting System</strong></p>
+</p>
 
-## 🌟 Key Features
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-14-black?style=flat&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Express-5.x-white?style=flat&logo=express" alt="Express" />
+  <img src="https://img.shields.io/badge/Ethereum-Sepolia-3C3C3D?style=flat&logo=ethereum" alt="Ethereum" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Supabase-336791?style=flat&logo=postgresql" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=flat" alt="License" />
+</p>
 
-- **Blockchain-Powered Voting**: All votes recorded on Sepolia Ethereum testnet
-- **Citizen Verification**: Identity verification against Government Registry (PostgreSQL)
-- **Team Synchronization**: All team members see the same data in real-time
-- **Smart Contract Storage**: Immutable vote records using Solidity smart contracts
-- **Zero Local Dependencies**: No local blockchain files or sync issues
-- **Secure Authentication**: JWT-based auth with cookie sessions
-- **Modern Stack**: Next.js frontend, Express.js backend, Ethereum blockchain
+---
+
+VoteGuard is a production-ready electronic voting system that combines **PostgreSQL** for identity management with **Ethereum blockchain** for transparent, tamper-proof vote recording. Every vote is encrypted, digitally signed, and stored immutably on the Sepolia testnet.
+
+> 📚 **[Full Documentation →](https://mouniksai.github.io/voteguard-docs/)** — Complete API reference, setup guides, and architecture overview.
+
+## ✨ Key Features
+
+| Feature | Description |
+|:---|:---|
+| ⛓️ **Blockchain Voting** | Votes recorded on Ethereum Sepolia via Solidity smart contracts |
+| 🔐 **Two-Factor Auth** | Password + Email OTP for every login |
+| 🏛️ **Govt Registry** | Citizen ID validated against PostgreSQL government database |
+| 🔑 **RSA Encryption** | RSA-2048 key exchange for end-to-end encrypted communication |
+| 🧾 **Vote Receipts** | SHA-256 cryptographic receipts for independent verification |
+| 👥 **Team Sync** | All team members share the same blockchain state in real-time |
 
 ## 🏗️ Architecture
 
-### Database Layer
+```
+┌─────────────┐     ┌──────────────────┐     ┌──────────────────────┐
+│  Next.js 14  │────▶│  Express.js API   │────▶│  Ethereum Sepolia    │
+│  (Frontend)  │     │  (Backend)        │     │  (Smart Contracts)   │
+│  Port 3000   │     │  Port 5001        │     │  Chain ID: 11155111  │
+└─────────────┘     └────────┬─────────┘     └──────────────────────┘
+                             │
+                    ┌────────▼─────────┐
+                    │   PostgreSQL     │
+                    │   (Supabase)     │
+                    │   Identity &     │
+                    │   Auth Only      │
+                    └──────────────────┘
+```
 
-- **PostgreSQL (Supabase)**: Citizen registry and user authentication
-- **Ethereum Sepolia**: All voting data (elections, candidates, votes)
+## 🚀 Quick Start
 
-### Blockchain Layer
-
-- **Smart Contract**: `0xE08b2c325F4e64DDb7837b6a4b1443935473ECB2`
-- **Network**: Sepolia Testnet (Chain ID: 11155111)
-- **RPC Provider**: Alchemy (free tier)
-
-## 🚀 Tech Stack
-
-- **Frontend**: Next.js 14, React, Tailwind CSS, Framer Motion
-- **Backend**: Node.js, Express.js, Prisma ORM
-- **Blockchain**: Solidity 0.8.20, Hardhat, Ethers.js v6
-- **Database**: PostgreSQL (Supabase)
-- **Authentication**: JWT, bcryptjs
-
-## 📋 Prerequisites
-
-- Node.js v18 or higher
-- MetaMask browser extension
-- Alchemy account (free)
-- Sepolia testnet ETH (from faucet)
-
-## ⚡ Quick Start
-
-### 1. Backend Setup
+### 1. Backend
 
 ```bash
 cd vote-guard-server
-
-# Install dependencies
 npm install
-
-# Copy environment template
-cp .env.example .env
-
-# Edit .env and add:
-# - ALCHEMY_API_KEY (from https://dashboard.alchemy.com/)
-# - SEPOLIA_PRIVATE_KEY (from MetaMask)
-# - DATABASE_URL (your Supabase connection)
-
-# Start backend
+cp .env.example .env    # Edit with your keys
 npm run dev
 ```
 
-**Expected Output:**
+**Expected:** `✅ VOTEGUARD SERVER RUNNING!` on port 5001
 
-```
-✅ Connected to Sepolia blockchain
-📜 Contract: 0xE08b2c325F4e64DDb7837b6a4b1443935473ECB2
-✅ VOTEGUARD SERVER RUNNING!
-```
-
-### 2. Frontend Setup
+### 2. Frontend
 
 ```bash
-cd ..  # Back to root
-
-# Install dependencies
+cd ..                   # Back to root
 npm install
-
-# Environment is pre-configured in .env.local
-
-# Start frontend
 npm run dev
 ```
 
-Open http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000)
 
 ### 3. Connect Wallet
 
-1. Click "Connect Wallet" or visit any voting page
-2. MetaMask will prompt you to switch to Sepolia network
-3. Approve the network switch
-4. You're ready to vote!
-
-## 📚 Documentation
-
-- **Team Setup Guide**: [TEAM_SYNC_SETUP_GUIDE.md](TEAM_SYNC_SETUP_GUIDE.md) - Complete setup for team members
-- **Migration Summary**: [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) - What changed from local to Sepolia
-- **Project Structure**: [STRUCTURE.md](STRUCTURE.md) - Code organization
+1. Install [MetaMask](https://metamask.io/) browser extension
+2. Switch to **Sepolia Test Network**
+3. Get free ETH from [Sepolia Faucet](https://sepoliafaucet.com/)
 
 ## 🔧 Environment Variables
 
-### Backend (.env)
+### Backend (`vote-guard-server/.env`)
 
 ```env
-# Blockchain
 BLOCKCHAIN_NETWORK=sepolia
 CONTRACT_ADDRESS=0xE08b2c325F4e64DDb7837b6a4b1443935473ECB2
 ALCHEMY_API_KEY=your_alchemy_key
 SEPOLIA_PRIVATE_KEY=your_private_key
-
-# Database
 DATABASE_URL=your_supabase_connection_string
-
-# Security
 JWT_SECRET=your_jwt_secret
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
 ```
 
-### Frontend (.env.local)
+### Frontend (`.env.local`)
 
 ```env
+NEXT_PUBLIC_API_URL=http://localhost:5001
 NEXT_PUBLIC_CONTRACT_ADDRESS=0xE08b2c325F4e64DDb7837b6a4b1443935473ECB2
 NEXT_PUBLIC_RPC_URL=https://eth-sepolia.g.alchemy.com/v2/your_key
-NEXT_PUBLIC_ALCHEMY_API_KEY=your_alchemy_key
 NEXT_PUBLIC_CHAIN_ID=11155111
-NEXT_PUBLIC_API_URL=http://localhost:5001
 ```
 
-## 🎯 Key Commands
+## 📁 Project Structure
+
+```
+vote-guard/
+├── app/                      # Next.js App Router
+│   ├── docs/                 # 📚 Documentation page
+│   ├── login/                # Authentication (2FA)
+│   ├── dashboard/            # Voter dashboard
+│   ├── admin/                # Admin panel
+│   ├── vote/                 # Ballot & voting
+│   ├── results/              # Election results
+│   ├── verify/               # Vote verification
+│   └── middleware.js          # Route protection
+├── vote-guard-server/        # Express.js Backend
+│   ├── src/
+│   │   ├── controllers/      # Business logic
+│   │   ├── routes/           # API route definitions
+│   │   ├── middleware/        # Auth & role middleware
+│   │   ├── blockchain/       # Sepolia integration
+│   │   └── utils/            # Crypto, email, encoding
+│   ├── contracts/            # Solidity smart contracts
+│   ├── prisma/               # Database schema
+│   └── server.js             # Entry point
+└── testing/                  # Test suites
+```
+
+## 🧪 Commands
 
 ```bash
 # Backend
 cd vote-guard-server
-npm install          # Install dependencies
-npm run dev          # Start development server
-npm run test         # Run tests
+npm run dev              # Start dev server
+npm run test             # Run tests with coverage
 
 # Frontend
-npm install          # Install dependencies
-npm run dev          # Start Next.js
-npm run build        # Build for production
+npm run dev              # Start Next.js
+npm run build            # Production build
+npm run test             # Run Jest tests
 
 # Blockchain
 cd vote-guard-server
-npx hardhat compile  # Compile contracts
-npx hardhat test     # Test contracts
+npx hardhat compile      # Compile contracts
+npx hardhat test         # Test contracts
 ```
 
-## 🌐 Important Links
+## 🌐 Links
 
-- **Contract on Etherscan**: https://sepolia.etherscan.io/address/0xE08b2c325F4e64DDb7837b6a4b1443935473ECB2
-- **Alchemy Dashboard**: https://dashboard.alchemy.com/
-- **Sepolia Faucet**: https://sepoliafaucet.com/
-- **MetaMask**: https://metamask.io/
+- **Smart Contract**: [View on Etherscan](https://sepolia.etherscan.io/address/0xE08b2c325F4e64DDb7837b6a4b1443935473ECB2)
+- **Alchemy Dashboard**: [dashboard.alchemy.com](https://dashboard.alchemy.com/)
+- **Sepolia Faucet**: [sepoliafaucet.com](https://sepoliafaucet.com/)
 
 ## 🔐 Security Notes
 
 - Never commit `.env` files to Git
 - Use dedicated test wallets for development
 - Get free Sepolia ETH from faucets (never buy test ETH)
-- All votes are publicly visible on blockchain (as designed)
-
-## 👥 Team Collaboration
-
-All team members connecting to the same contract address will see synchronized data:
-
-1. Member A creates an election → Everyone sees it instantly
-2. Member B casts a vote → Vote appears for all team members
-3. No manual syncing or database exports needed!
-
-## 📊 Project Status
-
-- ✅ Smart contract deployed on Sepolia
-- ✅ Backend connected to blockchain
-- ✅ Frontend with MetaMask integration
-- ✅ Network validation and switching
-- ✅ Team synchronization working
-- ✅ Zero local blockchain dependencies
-
-## 🆘 Troubleshooting
-
-**Backend won't start?**
-
-- Check SEPOLIA_PRIVATE_KEY is set in .env
-- Verify ALCHEMY_API_KEY is valid
-- Ensure CONTRACT_ADDRESS is correct
-
-**Wrong network error?**
-
-- Open MetaMask and switch to "Sepolia Test Network"
-- Enable test networks in MetaMask settings if not visible
-
-**Slow transactions?**
-
-- Sepolia transactions take 15-30 seconds (normal)
-- Check transaction on Etherscan for status
-
-**Different data than team?**
-
-- Ensure everyone uses same CONTRACT_ADDRESS
-- Verify BLOCKCHAIN_NETWORK=sepolia in all .env files
+- All votes are publicly verifiable on blockchain (by design)
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built for 3rd year CSE project
-- Ethereum Sepolia testnet for development environment
-- Alchemy for free RPC access
-- Supabase for database hosting
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-**Made with 🛡️ by the VoteGuard Team** 2. MetaMask will prompt you to switch to Sepolia network 3. Approve the network switch 4. You're ready to vote!
-
-## 📚 Documentation
-
-- **Team Setup Guide**: [TEAM_SYNC_SETUP_GUIDE.md](TEAM_SYNC_SETUP_GUIDE.md) - Complete setup for team members
-- **Migration Summary**: [MIGRATION_COMPLETE.md](MIGRATION_COMPLETE.md) - What changed from local to Sepolia
-- **Project Structure**: [STRUCTURE.md](STRUCTURE.md) - Code organization
-
-## 🔧 Environment Variables
-
-#### 1. PostgreSQL (Government Node)
-
-Create a database (e.g., `vote_guard`) and a table named `citizens`:
-
----
-
-## Project Structure
-
-```
-vote-guard/
-├── app/                  # Next.js App Router pages and layouts
-│   ├── login/            # Authentication pages
-│   ├── dashboard/        # Voter dashboard (Protected routes)
-│   ├── admin/            # Admin interface
-│   ├── layout.js         # Root layout
-│   └── page.js           # Entry point (Landing page)
-├── components/           # Reusable UI components
-├── public/               # Static assets (images, fonts)
-├── styles/               # Global styles (globals.css)
-├── middleware.js         # Edge middleware for route protection
-├── next.config.js        # Next.js configuration
-├── tailwind.config.js    # Tailwind CSS configuration
-└── package.json          # Project dependencies and scripts
-
-```
-## Getting Started
-**Prerequisites**
-
-#### 2. MongoDB
-
-Ensure your MongoDB instance is running. The application will automatically create the `users` collection upon the first successful registration.
-
-    npm or yarn package manager
-
-**Installation**
-
-  Clone the repository:
-    
-  git clone [https://github.com/mouniksai/vote-guard.git](https://github.com/mouniksai/vote-guard.git)
-  ```
-    cd vote-guard
-   ```
-  Install dependencies:
-   ```
-    npm install
-    # or
-    yarn install
-   ```
-
-## Configuration
-
-Create a .env.local file in the root directory to configure your environment variables.
-```
-  # URL of the Vote Guard Backend Server
-  NEXT_PUBLIC_API_URL=http://localhost:5001/api
-```
-    Note: Ensure your backend server is running on the specified port before starting the frontend.
-
-## Running the Application
-
-Development Mode:
-```
-npm run dev
-```
-Open http://localhost:3000 with your browser to see the result.
-
-Production Build:
-```
-npm run build
-npm start
-```
-
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-  Fork the repository.
-
-| Method | Endpoint              | Description                                                               |
-| ------ | --------------------- | ------------------------------------------------------------------------- |
-| `POST` | `/api/verify-citizen` | Checks if a Citizen ID exists in the Government Registry (Postgres).      |
-| `POST` | `/api/register`       | Registers a new user in MongoDB if the Citizen ID is valid and not taken. |
-| `POST` | `/api/login`          | Authenticates a user and retrieves linked citizen details from Postgres.  |
+**Made with 🛡️ by the VoteGuard Team** — 3rd Year CSE Project

@@ -21,6 +21,19 @@ export default function VerificationPage() {
     const [stepsCompleted, setStepsCompleted] = useState(0);
     const [loadingStep, setLoadingStep] = useState(null);
     const [cameraActive, setCameraActive] = useState(false);
+    const [fingerprintSupported, setFingerprintSupported] = useState(true); // assume supported until checked
+    const [fingerprintError, setFingerprintError] = useState('');
+
+    // Check platform authenticator (fingerprint) availability on mount
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.PublicKeyCredential) {
+            PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+                .then((available) => setFingerprintSupported(available))
+                .catch(() => setFingerprintSupported(false));
+        } else {
+            setFingerprintSupported(false);
+        }
+    }, []);
 
     // Debug logging
     useEffect(() => {
@@ -81,13 +94,132 @@ export default function VerificationPage() {
         }
     };
 
-    // --- STEP 2: FINGERPRINT (SKIPPED/MOCKED) ---
-    const handleFingerprint = () => {
+    // --- STEP 2: FINGERPRINT — WebAuthn Platform Authenticator (Windows Hello / Touch ID) ---
+    const handleFingerprint = async () => {
         setLoadingStep(2);
-        setTimeout(() => {
-            setStepsCompleted(2);
+        setFingerprintError('');
+
+        try {
+            // 1. Confirm platform authenticator is available
+            if (!window.PublicKeyCredential) {
+                setFingerprintError('WebAuthn is not supported in this browser.');
+                setLoadingStep(null);
+                return;
+            }
+
+            const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+            if (!available) {
+                setFingerprintError('No fingerprint/biometric sensor detected on this device.');
+                setFingerprintSupported(false);
+                setLoadingStep(null);
+                return;
+            }
+
+            // 2. Fetch a random challenge from the backend
+            const challengeRes = await fetch('http://localhost:5001/api/fingerprint/challenge', {
+                method: 'GET',
+                credentials: 'include',
+            });
+
+            if (!challengeRes.ok) {
+                const err = await challengeRes.json().catch(() => ({}));
+                throw new Error(err.message || `Server error: ${challengeRes.status}`);
+            }
+
+            const { challenge, userId, isRegistered, storedCredentialId } = await challengeRes.json();
+
+            // 3. Decode base64 challenge to Uint8Array
+            const challengeBytes = Uint8Array.from(atob(challenge), c => c.charCodeAt(0));
+
+            let credential;
+
+            if (!isRegistered) {
+                // --- REGISTRATION: First time scanning ---
+                const userIdBytes = new TextEncoder().encode(userId);
+                
+                credential = await navigator.credentials.create({
+                    publicKey: {
+                        challenge: challengeBytes,
+                        rp: {
+                            name: 'VoteGuard',
+                            id: window.location.hostname   // 'localhost' in dev, real domain in prod
+                        },
+                        user: {
+                            id: userIdBytes,
+                            name: 'voter',
+                            displayName: 'VoteGuard Voter'
+                        },
+                        pubKeyCredParams: [
+                            { alg: -7, type: 'public-key' },  // ES256 (preferred)
+                            { alg: -257, type: 'public-key' }   // RS256 (Windows Hello fallback)
+                        ],
+                        authenticatorSelection: {
+                            authenticatorAttachment: 'platform',
+                            userVerification: 'required',
+                            requireResidentKey: false
+                        },
+                        timeout: 60000   // 60 seconds for user to scan
+                    }
+                });
+            } else {
+                // --- AUTHENTICATION: Verifying an existing fingerprint ---
+                // Convert the stored base64url credential ID back to Uint8Array
+                let base64 = storedCredentialId.replace(/-/g, '+').replace(/_/g, '/');
+                while (base64.length % 4) { base64 += '='; }
+                const storedIdBytes = Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+
+                credential = await navigator.credentials.get({
+                    publicKey: {
+                        challenge: challengeBytes,
+                        allowCredentials: [{
+                            id: storedIdBytes,
+                            type: 'public-key',
+                            transports: ['internal'] // Forces local device scanner (Windows Hello / Touch ID)
+                        }],
+                        userVerification: 'required',
+                        timeout: 60000
+                    }
+                });
+            }
+
+            if (!credential || !credential.id) {
+                throw new Error('No credential returned from authenticator.');
+            }
+
+            // 5. Send credentialId to backend for acceptance
+            const verifyRes = await fetch('http://localhost:5001/api/fingerprint/verify', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credentialId: credential.id })
+            });
+
+            const result = await verifyRes.json();
+
+            if (verifyRes.ok && result.success) {
+                setStepsCompleted(2); // ✅ Step 2 passed
+            } else {
+                setFingerprintError(result.message || 'Fingerprint verification rejected by server.');
+            }
+
+        } catch (err) {
+            console.error('[Fingerprint] Error:', err);
+            if (err.name === 'NotAllowedError') {
+                // User cancelled the OS dialog or took too long
+                setFingerprintError('Fingerprint scan was cancelled or denied. Please try again.');
+            } else if (err.name === 'InvalidStateError') {
+                // Credential already exists — still treat as success since user proved biometric
+                setStepsCompleted(2);
+                return;
+            } else if (err.name === 'NotSupportedError') {
+                setFingerprintError('Biometric authentication is not supported on this device.');
+                setFingerprintSupported(false);
+            } else {
+                setFingerprintError(`Error: ${err.message}`);
+            }
+        } finally {
             setLoadingStep(null);
-        }, 1500);
+        }
     };
 
     // Generic handler for verification steps
@@ -248,19 +380,46 @@ export default function VerificationPage() {
                         </div>
                     </VerificationCard>
 
-                    {/* Step 2: Biometric Scan */}
+                    {/* Step 2: Biometric Scan (WebAuthn — Touch ID / Windows Hello) */}
                     <VerificationCard
                         stepNumber={2}
                         title="Biometric Scan"
-                        description="Place registered finger on the hardware sensor."
+                        description={fingerprintSupported
+                            ? 'Touch your fingerprint sensor — Windows Hello or Touch ID will prompt you.'
+                            : 'No biometric sensor detected on this device.'}
                         icon={<Fingerprint size={32} />}
-                        isActive={stepsCompleted >= 1}
+                        isActive={stepsCompleted >= 1 && fingerprintSupported}
                         isCompleted={stepsCompleted >= 2}
                         isLoading={loadingStep === 2}
                         onVerify={() => handleVerify(2)}
                     >
-                        <div className="mb-8 mt-6 flex justify-center">
-                            <Fingerprint className={`text-6xl transition-colors duration-500 ${loadingStep === 2 ? 'text-blue-400 animate-pulse' : 'text-slate-700'}`} />
+                        <div className="mb-6 mt-4 flex flex-col items-center gap-3">
+                            <Fingerprint
+                                size={64}
+                                className={`transition-all duration-500 ${stepsCompleted >= 2
+                                        ? 'text-emerald-400'
+                                        : loadingStep === 2
+                                            ? 'text-blue-400 animate-pulse scale-110'
+                                            : fingerprintSupported
+                                                ? 'text-slate-600'
+                                                : 'text-red-800'
+                                    }`}
+                            />
+                            {loadingStep === 2 && (
+                                <p className="text-xs text-blue-400 animate-pulse text-center">
+                                    Waiting for fingerprint scan...
+                                </p>
+                            )}
+                            {fingerprintError && stepsCompleted < 2 && (
+                                <p className="text-xs text-red-400 text-center px-2">
+                                    {fingerprintError}
+                                </p>
+                            )}
+                            {!fingerprintSupported && stepsCompleted < 2 && (
+                                <p className="text-xs text-slate-500 text-center">
+                                    Requires a device with Windows Hello or Touch ID
+                                </p>
+                            )}
                         </div>
                     </VerificationCard>
 
